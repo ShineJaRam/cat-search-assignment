@@ -1,4 +1,9 @@
-<script src="../card/card.component.ts"></script>
-<ul class="card-list">
-  <app-card *ngFor="let cat of cats" [catData]="cat"></app-card>
-</ul>
+<app-search-form (searchResult)="getSearchResult($event)"></app-search-form>
+<div [ngSwitch]="">
+  <!--  <ul>-->
+  <!--    <p>No Result</p>-->
+  <!--  </ul>-->
+  <ul class="card-list">
+    <app-card *ngFor="let cat of cats" [catData]="cat"></app-card>
+  </ul>
+</div>

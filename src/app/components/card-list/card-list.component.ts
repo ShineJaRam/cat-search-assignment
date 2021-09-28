@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CatsService } from '../../service/cats.service';
-import { CatInterface } from '../../models';
-import { tap } from 'rxjs/operators';
+import { CatInfo } from '../../models';
+import { map, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-card-list',
@@ -9,7 +9,8 @@ import { tap } from 'rxjs/operators';
   styleUrls: ['./card-list.component.scss'],
 })
 export class CardListComponent implements OnInit {
-  cats: CatInterface[] = [];
+  cats: CatInfo[] = [];
+  altImage = 'https://t1.daumcdn.net/cfile/tistory/998FBA335C764C711D';
 
   constructor(private catService: CatsService) {}
 
@@ -20,7 +21,25 @@ export class CardListComponent implements OnInit {
   getCatsList(): void {
     this.catService
       .getCats()
-      .pipe(tap(console.log))
-      .subscribe(cats => (this.cats = cats));
+      .pipe(
+        map(cats => {
+          return cats.map<CatInfo>(cat => {
+            return {
+              ...cat,
+              image: {
+                ...cat.image,
+                url: cat.image?.url ?? this.altImage,
+              },
+            };
+          });
+        })
+      )
+      .subscribe(cats => {
+        return (this.cats = cats);
+      });
+  }
+
+  getSearchResult(catLists: CatInfo[]): void {
+    this.cats = catLists;
   }
 }

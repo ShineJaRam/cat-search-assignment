@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CatsService } from '../../service/cats.service';
-import { CatInterface } from '../../models';
+import { CatInfo } from '../../models';
 
 @Component({
   selector: 'app-card',
@@ -8,9 +8,20 @@ import { CatInterface } from '../../models';
   styleUrls: ['./card.component.scss'],
 })
 export class CardComponent implements OnInit {
-  @Input() catData: CatInterface = {};
+  @Input() catData: CatInfo;
 
-  constructor() {}
+  constructor() {
+    this.catData = {
+      id: '',
+      name: '',
+      image: {
+        id: '',
+        width: 0,
+        height: 0,
+        url: '',
+      },
+    };
+  }
 
   ngOnInit(): void {}
 }

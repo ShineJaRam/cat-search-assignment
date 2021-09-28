@@ -13,10 +13,6 @@ import { CardListComponent } from './card-list/card-list.component';
     FormsModule,
     ReactiveFormsModule,
     RouterModule.forChild([
-      // {
-      //   path: '',
-      //   component: SearchFormComponent,
-      // },
       {
         path: '',
         component: CardListComponent,
