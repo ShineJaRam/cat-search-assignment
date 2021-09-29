@@ -25,14 +25,14 @@ export class SearchFormComponent implements OnInit {
     this.inputFormGroup = this.fb.group({
       keyword: [''],
     });
-  }
-
-  ngOnInit(): void {
     this.cats$ = this.inputFormGroup.get('keyword')?.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
       switchMap((keyword: string) => this.catService.searchCats(keyword))
     );
+  }
+
+  ngOnInit(): void {
     this.cats$?.subscribe(cats => console.log(cats.length));
   }
 

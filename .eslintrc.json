@@ -15,7 +15,6 @@
         "createDefaultProgram": true
       },
       "extends": [
-        "plugin:@angular-eslint/eslint-plugin",
         "plugin:@angular-eslint/recommended",
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
@@ -35,8 +34,7 @@
             "prefix": "app",
             "style": "kebab-case"
           }
-        ],
-        "@angular-eslint/no-empty-lifecycle-method": "off"
+        ]
       }
     },
     {
@@ -46,7 +44,7 @@
       "extends": [
         "plugin:@angular-eslint/template/recommended"
       ],
-      "rules": { }
+      "rules": {}
     }
   ]
 }
