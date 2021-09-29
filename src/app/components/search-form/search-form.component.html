@@ -11,9 +11,13 @@
     </button>
   </form>
   <ul class="search-result">
-    <li class="search-item" *ngIf="isKeyword">추천 검색어가 없습니다.</li>
-    <li class="search-item" *ngFor="let cat of cats$ | async">
-      {{ cat.name }}
+    <li class="search-item" *ngIf="hasNoKeyword; else searchItem">
+      추천 검색어가 없습니다.
     </li>
+    <ng-template #searchItem>
+      <li class="search-item" *ngFor="let cat of cats$ | async">
+        {{ cat.name }}
+      </li>
+    </ng-template>
   </ul>
 </section>

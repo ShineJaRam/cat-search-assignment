@@ -8,7 +8,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { CatInfo } from '../../models';
 import { CatsService } from '../../service/cats.service';
 import {
@@ -16,7 +16,7 @@ import {
   distinctUntilChanged,
   map,
   switchMap,
-  takeWhile,
+  takeUntil,
 } from 'rxjs/operators';
 
 @Component({
@@ -25,12 +25,13 @@ import {
   styleUrls: ['./search-form.component.scss'],
 })
 export class SearchFormComponent implements OnInit, OnDestroy {
-  observableAlive = true;
   inputFormGroup: FormGroup;
   cats$?: Observable<CatInfo[]>;
   keywordSubscription$?: Subscription;
-  isKeyword?: boolean;
+  hasNoKeyword?: boolean;
   altImage = 'https://t1.daumcdn.net/cfile/tistory/998FBA335C764C711D';
+  onDestroy = new Subject<void>();
+  searchCat: (value: string) => Observable<CatInfo[]>;
 
   @Output() searchResult = new EventEmitter<CatInfo[]>();
   @ViewChild('formInput', { static: true }) formInput: ElementRef;
@@ -44,47 +45,49 @@ export class SearchFormComponent implements OnInit, OnDestroy {
       keyword: [''],
     });
     this.cats$ = this.inputFormGroup.get('keyword')?.valueChanges.pipe(
-      takeWhile(() => this.observableAlive),
       debounceTime(300),
       distinctUntilChanged(),
-      switchMap((keyword: string) => this.catService.searchCats(keyword))
+      switchMap((keyword: string) => this.catService.searchCats(keyword)),
+      takeUntil(this.onDestroy)
     );
     this.formInput = formInput;
     this.keywordSubscription$ = this.cats$
       ?.pipe(
-        takeWhile(() => this.observableAlive),
-        map(cats => {
-          return (
+        map(
+          cats =>
             cats.length === 0 &&
             this.inputFormGroup.get('keyword')?.value.length !== 0
-          );
-        })
+        ),
+        takeUntil(this.onDestroy)
       )
-      .subscribe(result => (this.isKeyword = result));
+      .subscribe(result => (this.hasNoKeyword = result));
+    this.searchCat = (value: string) => this.catService.searchCats(value);
   }
 
   ngOnInit(): void {}
 
   ngOnDestroy() {
-    this.observableAlive = false;
+    this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   onSubmit(form: FormGroup): void {
-    this.catService
-      .searchCats(form.value.keyword)
+    const {
+      value: { keyword },
+    } = form;
+
+    this.searchCat(keyword)
       .pipe(
-        takeWhile(() => this.observableAlive),
-        map(cats => {
-          return cats.map<CatInfo>(cat => {
-            return {
-              ...cat,
-              image: {
-                ...cat.image,
-                url: cat.image?.url ?? this.altImage,
-              },
-            };
-          });
-        })
+        map(cats =>
+          cats.map<CatInfo>(cat => ({
+            ...cat,
+            image: {
+              ...cat.image,
+              url: cat.image?.url ?? this.altImage,
+            },
+          }))
+        ),
+        takeUntil(this.onDestroy)
       )
       .subscribe(data => {
         this.searchResult.emit(data);

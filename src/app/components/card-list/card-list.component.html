@@ -1,9 +1,9 @@
 <app-search-form (searchResult)="getSearchResult($event)"></app-search-form>
-<div [ngSwitch]="">
-  <ul class="no-result" *ngIf="cats.length === 0">
+<ul class="card-list" *ngIf="cats.length !== 0; else noResult">
+  <app-card *ngFor="let cat of cats" [catData]="cat"></app-card>
+</ul>
+<ng-template #noResult>
+  <ul class="no-result">
     <p>검색 결과가 없습니다.</p>
   </ul>
-  <ul class="card-list" *ngIf="cats.length !== 0">
-    <app-card *ngFor="let cat of cats" [catData]="cat"></app-card>
-  </ul>
-</div>
+</ng-template>

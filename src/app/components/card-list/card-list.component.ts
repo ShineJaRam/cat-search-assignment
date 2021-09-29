@@ -1,7 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CatsService } from '../../service/cats.service';
 import { CatInfo } from '../../models';
-import { map, takeWhile } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-card-list',
@@ -11,38 +12,37 @@ import { map, takeWhile } from 'rxjs/operators';
 export class CardListComponent implements OnInit, OnDestroy {
   cats: CatInfo[] = [];
   altImage = 'https://t1.daumcdn.net/cfile/tistory/998FBA335C764C711D';
-  observableAlive = true;
+  onDestroy = new Subject<void>();
+  getCats: Observable<CatInfo[]>;
 
-  constructor(private catService: CatsService) {}
+  constructor(private catService: CatsService) {
+    this.getCats = this.catService.getCats();
+  }
 
   ngOnInit(): void {
     this.getCatsList();
   }
 
   ngOnDestroy() {
-    this.observableAlive = false;
+    this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   getCatsList(): void {
-    this.catService
-      .getCats()
+    this.getCats
       .pipe(
-        takeWhile(() => this.observableAlive),
-        map(cats => {
-          return cats.map<CatInfo>(cat => {
-            return {
-              ...cat,
-              image: {
-                ...cat.image,
-                url: cat.image?.url ?? this.altImage,
-              },
-            };
-          });
-        })
+        map(cats =>
+          cats.map<CatInfo>(cat => ({
+            ...cat,
+            image: {
+              ...cat.image,
+              url: cat.image?.url ?? this.altImage,
+            },
+          }))
+        ),
+        takeUntil(this.onDestroy)
       )
-      .subscribe(cats => {
-        return (this.cats = cats);
-      });
+      .subscribe(cats => (this.cats = cats));
   }
 
   getSearchResult(catLists: CatInfo[]): void {
