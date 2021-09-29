@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { CatsService } from '../../service/cats.service';
 import { CatInfo } from '../../models';
 
 @Component({

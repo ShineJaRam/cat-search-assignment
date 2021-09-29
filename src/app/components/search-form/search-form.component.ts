@@ -1,6 +1,6 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { Observable, of, Subject, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { CatInfo } from '../../models';
 import { CatsService } from '../../service/cats.service';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';

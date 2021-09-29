@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CatsService } from '../../service/cats.service';
 import { CatInfo } from '../../models';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-card-list',
