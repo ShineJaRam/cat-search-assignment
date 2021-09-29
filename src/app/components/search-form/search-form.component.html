@@ -1,20 +1,17 @@
 <section class="form-section">
   <form [formGroup]="inputFormGroup">
-    <input class="form-input" formControlName="keyword" />
+    <input
+      class="form-input"
+      formControlName="keyword"
+      #formInput
+      (click)="selectText()"
+    />
     <button class="form-button" (click)="onSubmit(inputFormGroup)">
       search
     </button>
   </form>
   <ul class="search-result">
-    <li
-      class="search-item"
-      *ngIf="
-        (cats$ | async)?.length === 0 &&
-        inputFormGroup.get('keyword')?.value.length !== 0
-      "
-    >
-      추천 검색어가 없습니다.
-    </li>
+    <li class="search-item" *ngIf="isKeyword">추천 검색어가 없습니다.</li>
     <li class="search-item" *ngFor="let cat of cats$ | async">
       {{ cat.name }}
     </li>
