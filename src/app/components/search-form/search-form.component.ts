@@ -26,6 +26,7 @@ import {
 })
 export class SearchFormComponent implements OnInit, OnDestroy {
   @Output() searchResult = new EventEmitter<CatInfo[]>();
+  @Output() selectedCatName = new EventEmitter<string>();
   @ViewChild('formInput', { static: true })
   formInput: ElementRef<HTMLInputElement>;
 
@@ -35,7 +36,7 @@ export class SearchFormComponent implements OnInit, OnDestroy {
   hasNoKeyword: boolean;
   altImage = 'https://t1.daumcdn.net/cfile/tistory/998FBA335C764C711D';
   onDestroy = new Subject<void>();
-  searchCat: (value: string) => Observable<CatInfo[]>;
+  searchCat: (value: string) => Subscription;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -63,7 +64,24 @@ export class SearchFormComponent implements OnInit, OnDestroy {
         takeUntil(this.onDestroy)
       )
       .subscribe(result => (this.hasNoKeyword = result));
-    this.searchCat = (value: string) => this.catService.searchCats(value);
+    this.searchCat = (value: string) =>
+      this.catService
+        .searchCats(value)
+        .pipe(
+          map(cats =>
+            cats.map<CatInfo>(cat => ({
+              ...cat,
+              image: {
+                ...cat.image,
+                url: cat.image?.url ?? this.altImage,
+              },
+            }))
+          ),
+          takeUntil(this.onDestroy)
+        )
+        .subscribe(data => {
+          this.searchResult.emit(data);
+        });
   }
 
   ngOnInit(): void {}
@@ -78,22 +96,11 @@ export class SearchFormComponent implements OnInit, OnDestroy {
       value: { keyword },
     } = this.inputFormGroup;
 
-    this.searchCat(keyword)
-      .pipe(
-        map(cats =>
-          cats.map<CatInfo>(cat => ({
-            ...cat,
-            image: {
-              ...cat.image,
-              url: cat.image?.url ?? this.altImage,
-            },
-          }))
-        ),
-        takeUntil(this.onDestroy)
-      )
-      .subscribe(data => {
-        this.searchResult.emit(data);
-      });
+    this.searchCat(keyword);
+  }
+
+  selectCat(keyword: string): void {
+    this.selectedCatName.emit(keyword);
   }
 
   selectText(): void {

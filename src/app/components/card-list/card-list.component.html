@@ -1,6 +1,9 @@
-<app-search-form (searchResult)="updateCatInfos($event)"></app-search-form>
-<ul class="card-list" *ngIf="catInfos.length !== 0; else noResult">
-  <app-card *ngFor="let cat of catInfos" [catData]="cat"></app-card>
+<app-search-form
+  (searchResult)="updateCatInfos($event)"
+  (selectedCatName)="updateSelectedCat($event)"
+></app-search-form>
+<ul class="card-list" *ngIf="showedCatInfos.length !== 0; else noResult">
+  <app-card *ngFor="let cat of showedCatInfos" [catData]="cat"></app-card>
 </ul>
 <ng-template #noResult>
   <ul class="no-result">

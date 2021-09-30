@@ -10,7 +10,8 @@ import { Observable, Subject } from 'rxjs';
   styleUrls: ['./card-list.component.scss'],
 })
 export class CardListComponent implements OnInit, OnDestroy {
-  catInfos: CatInfo[] = [];
+  showedCatInfos: CatInfo[] = [];
+  savedCatInfos: CatInfo[] = [];
   altImage = 'https://t1.daumcdn.net/cfile/tistory/998FBA335C764C711D';
   onDestroy = new Subject<void>();
   catInfos$: Observable<CatInfo[]>;
@@ -42,10 +43,18 @@ export class CardListComponent implements OnInit, OnDestroy {
         ),
         takeUntil(this.onDestroy)
       )
-      .subscribe(cats => (this.catInfos = cats));
+      .subscribe(
+        cats => ((this.savedCatInfos = cats), (this.showedCatInfos = cats))
+      );
   }
 
   updateCatInfos(catLists: CatInfo[]): void {
-    this.catInfos = catLists;
+    this.showedCatInfos = catLists;
+  }
+
+  updateSelectedCat(catName: string): void {
+    this.showedCatInfos = this.savedCatInfos.filter(
+      cat => cat.name === catName
+    );
   }
 }

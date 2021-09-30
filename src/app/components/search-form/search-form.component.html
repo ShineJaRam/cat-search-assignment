@@ -13,7 +13,11 @@
       추천 검색어가 없습니다.
     </li>
     <ng-template #searchItem>
-      <li class="search-item" *ngFor="let cat of cats$ | async">
+      <li
+        class="search-item"
+        *ngFor="let cat of cats$ | async"
+        (click)="selectCat(cat.name)"
+      >
         {{ cat.name }}
       </li>
     </ng-template>
