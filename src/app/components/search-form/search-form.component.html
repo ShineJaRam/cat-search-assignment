@@ -1,12 +1,12 @@
 <section class="form-section">
-  <form [formGroup]="inputFormGroup" (ngSubmit)="onSubmit(inputFormGroup)">
+  <form [formGroup]="inputFormGroup" (ngSubmit)="onSubmit()">
     <input
       class="form-input"
       formControlName="keyword"
       #formInput
       (click)="selectText()"
     />
-    <button class="form-button">search</button>
+    <button type="submit" class="form-button">search</button>
   </form>
   <ul class="search-result">
     <li class="search-item" *ngIf="hasNoKeyword; else searchItem">

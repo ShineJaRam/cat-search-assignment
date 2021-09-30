@@ -73,10 +73,10 @@ export class SearchFormComponent implements OnInit, OnDestroy {
     this.onDestroy.complete();
   }
 
-  onSubmit(form: FormGroup): void {
+  onSubmit(): void {
     const {
       value: { keyword },
-    } = form;
+    } = this.inputFormGroup;
 
     this.searchCat(keyword)
       .pipe(
