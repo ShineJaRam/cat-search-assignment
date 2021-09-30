@@ -10,13 +10,13 @@ import { Observable, Subject } from 'rxjs';
   styleUrls: ['./card-list.component.scss'],
 })
 export class CardListComponent implements OnInit, OnDestroy {
-  cats: CatInfo[] = [];
+  catInfos: CatInfo[] = [];
   altImage = 'https://t1.daumcdn.net/cfile/tistory/998FBA335C764C711D';
   onDestroy = new Subject<void>();
-  getCats: Observable<CatInfo[]>;
+  catInfos$: Observable<CatInfo[]>;
 
   constructor(private catService: CatsService) {
-    this.getCats = this.catService.getCats();
+    this.catInfos$ = this.catService.getCats();
   }
 
   ngOnInit(): void {
@@ -29,7 +29,7 @@ export class CardListComponent implements OnInit, OnDestroy {
   }
 
   getCatsList(): void {
-    this.getCats
+    this.catInfos$
       .pipe(
         map(cats =>
           cats.map<CatInfo>(cat => ({
@@ -42,10 +42,10 @@ export class CardListComponent implements OnInit, OnDestroy {
         ),
         takeUntil(this.onDestroy)
       )
-      .subscribe(cats => (this.cats = cats));
+      .subscribe(cats => (this.catInfos = cats));
   }
 
-  getSearchResult(catLists: CatInfo[]): void {
-    this.cats = catLists;
+  updateCatInfos(catLists: CatInfo[]): void {
+    this.catInfos = catLists;
   }
 }

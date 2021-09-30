@@ -8,7 +8,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { Observable, Subject, Subscription } from 'rxjs';
+import { Observable, of, Subject, Subscription } from 'rxjs';
 import { CatInfo } from '../../models';
 import { CatsService } from '../../service/cats.service';
 import {
@@ -25,38 +25,40 @@ import {
   styleUrls: ['./search-form.component.scss'],
 })
 export class SearchFormComponent implements OnInit, OnDestroy {
+  @Output() searchResult = new EventEmitter<CatInfo[]>();
+  @ViewChild('formInput', { static: true })
+  formInput: ElementRef<HTMLInputElement>;
+
   inputFormGroup: FormGroup;
-  cats$?: Observable<CatInfo[]>;
-  keywordSubscription$?: Subscription;
-  hasNoKeyword?: boolean;
+  cats$ = of<CatInfo[]>([]);
+  keywordSubscription?: Subscription;
+  hasNoKeyword: boolean;
   altImage = 'https://t1.daumcdn.net/cfile/tistory/998FBA335C764C711D';
   onDestroy = new Subject<void>();
   searchCat: (value: string) => Observable<CatInfo[]>;
 
-  @Output() searchResult = new EventEmitter<CatInfo[]>();
-  @ViewChild('formInput', { static: true }) formInput: ElementRef;
-
   constructor(
-    private fb: FormBuilder,
+    private formBuilder: FormBuilder,
     private catService: CatsService,
-    formInput: ElementRef
+    formInput: ElementRef<HTMLInputElement>
   ) {
-    this.inputFormGroup = this.fb.group({
+    this.hasNoKeyword = false;
+    this.inputFormGroup = this.formBuilder.group({
       keyword: [''],
     });
-    this.cats$ = this.inputFormGroup.get('keyword')?.valueChanges.pipe(
+    this.cats$ = this.inputFormGroup.controls['keyword'].valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
       switchMap((keyword: string) => this.catService.searchCats(keyword)),
       takeUntil(this.onDestroy)
     );
     this.formInput = formInput;
-    this.keywordSubscription$ = this.cats$
-      ?.pipe(
+    this.keywordSubscription = this.cats$
+      .pipe(
         map(
           cats =>
             cats.length === 0 &&
-            this.inputFormGroup.get('keyword')?.value.length !== 0
+            this.inputFormGroup.controls['keyword'].value.length !== 0
         ),
         takeUntil(this.onDestroy)
       )
