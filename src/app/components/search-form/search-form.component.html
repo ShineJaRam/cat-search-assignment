@@ -1,4 +1,21 @@
-<form [formGroup]="inputForm">
-  <input class="form-input" formControlName="keyword" />
-  <button class="form-button">search</button>
-</form>
+<section class="form-section">
+  <form [formGroup]="inputFormGroup" (ngSubmit)="onSubmit()">
+    <input
+      class="form-input"
+      formControlName="keyword"
+      #formInput
+      (click)="selectText()"
+    />
+    <button type="submit" class="form-button">search</button>
+  </form>
+  <ul class="search-result">
+    <li class="search-item" *ngIf="hasNoKeyword; else searchItem">
+      추천 검색어가 없습니다.
+    </li>
+    <ng-template #searchItem>
+      <li class="search-item" *ngFor="let cat of cats$ | async">
+        {{ cat.name }}
+      </li>
+    </ng-template>
+  </ul>
+</section>

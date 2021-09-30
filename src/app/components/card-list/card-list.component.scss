@@ -5,3 +5,14 @@
   grid-template-columns: repeat(3, 1fr);
   grid-gap: 1em;
 }
+
+.no-result {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+
+  p {
+    font-size: 4rem;
+  }
+}

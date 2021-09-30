@@ -1,3 +1,4 @@
 <li class="card-item">
-  <img [src]="catData.image?.url" [alt]="catData.alt_names" />
+  <span>{{ catData.name }}</span>
+  <img [src]="catData.image.url" [alt]="catData.name" />
 </li>
