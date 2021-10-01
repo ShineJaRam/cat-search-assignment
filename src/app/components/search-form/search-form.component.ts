@@ -8,12 +8,14 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { CatInfo } from '../../models';
 import { CatsService } from '../../service/cats.service';
 import {
   debounceTime,
   distinctUntilChanged,
+  map,
+  shareReplay,
   switchMap,
   takeUntil,
 } from 'rxjs/operators';
@@ -36,7 +38,7 @@ export class SearchFormComponent implements OnInit, OnDestroy {
 
   inputFormGroup: FormGroup;
 
-  catsList: CatInfo[] = [];
+  cats$: Observable<CatInfo[]>;
 
   onDestroy = new Subject<void>();
 
@@ -49,21 +51,24 @@ export class SearchFormComponent implements OnInit, OnDestroy {
       keyword: [''],
     });
 
-    this.inputFormGroup.controls['keyword'].valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        switchMap((keyword: string) => this.catService.searchCats(keyword)),
-        takeUntil(this.onDestroy)
-      )
-      .subscribe(cats => {
-        this.catsList = cats;
+    this.cats$ = this.inputFormGroup.controls['keyword'].valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((keyword: string) => this.catService.searchCats(keyword)),
+      shareReplay(1),
+      takeUntil(this.onDestroy)
+    );
 
-        this.inputFormGroup.controls['keyword'].value.length !== 0 &&
-        cats.length === 0
-          ? (this.hasNoKeyword = true)
-          : (this.hasNoKeyword = false);
-      });
+    this.cats$
+      .pipe(
+        map(
+          cats =>
+            (this.hasNoKeyword =
+              cats.length === 0 &&
+              this.inputFormGroup.controls['keyword'].value.length !== 0)
+        )
+      )
+      .subscribe(result => (this.hasNoKeyword = result));
 
     this.formInput = formInput;
   }
