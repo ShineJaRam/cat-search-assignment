@@ -8,7 +8,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { Observable, of, Subject, Subscription } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { CatInfo } from '../../models';
 import { CatsService } from '../../service/cats.service';
 import {
@@ -27,61 +27,49 @@ import {
 export class SearchFormComponent implements OnInit, OnDestroy {
   @Output() searchResult = new EventEmitter<CatInfo[]>();
   @Output() selectedCatName = new EventEmitter<string>();
+
   @ViewChild('formInput', { static: true })
   formInput: ElementRef<HTMLInputElement>;
 
-  inputFormGroup: FormGroup;
-  cats$ = of<CatInfo[]>([]);
-  keywordSubscription?: Subscription;
-  hasNoKeyword: boolean;
   altImage = 'https://t1.daumcdn.net/cfile/tistory/998FBA335C764C711D';
+
+  hasNoKeyword = false;
+
+  inputFormGroup: FormGroup;
+
+  cats$ = of<CatInfo[]>([]);
+
   onDestroy = new Subject<void>();
-  searchCat: (value: string) => Subscription;
 
   constructor(
     private formBuilder: FormBuilder,
     private catService: CatsService,
     formInput: ElementRef<HTMLInputElement>
   ) {
-    this.hasNoKeyword = false;
     this.inputFormGroup = this.formBuilder.group({
       keyword: [''],
     });
+
     this.cats$ = this.inputFormGroup.controls['keyword'].valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
       switchMap((keyword: string) => this.catService.searchCats(keyword)),
       takeUntil(this.onDestroy)
     );
+
     this.formInput = formInput;
-    this.keywordSubscription = this.cats$
+
+    this.cats$
       .pipe(
         map(
           cats =>
-            cats.length === 0 &&
-            this.inputFormGroup.controls['keyword'].value.length !== 0
+            (this.hasNoKeyword =
+              cats.length === 0 &&
+              this.inputFormGroup.controls['keyword'].value.length !== 0)
         ),
         takeUntil(this.onDestroy)
       )
       .subscribe(result => (this.hasNoKeyword = result));
-    this.searchCat = (value: string) =>
-      this.catService
-        .searchCats(value)
-        .pipe(
-          map(cats =>
-            cats.map<CatInfo>(cat => ({
-              ...cat,
-              image: {
-                ...cat.image,
-                url: cat.image?.url ?? this.altImage,
-              },
-            }))
-          ),
-          takeUntil(this.onDestroy)
-        )
-        .subscribe(data => {
-          this.searchResult.emit(data);
-        });
   }
 
   ngOnInit(): void {}
@@ -96,7 +84,7 @@ export class SearchFormComponent implements OnInit, OnDestroy {
       value: { keyword },
     } = this.inputFormGroup;
 
-    this.searchCat(keyword);
+    this.selectedCatName.emit(keyword);
   }
 
   selectCat(keyword: string): void {

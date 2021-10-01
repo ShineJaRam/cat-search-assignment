@@ -10,11 +10,15 @@ import { Observable, Subject } from 'rxjs';
   styleUrls: ['./card-list.component.scss'],
 })
 export class CardListComponent implements OnInit, OnDestroy {
+  title = '😸 고양이 사진 갤러리 😻';
+  altImage = 'https://t1.daumcdn.net/cfile/tistory/998FBA335C764C711D';
+
   showedCatInfos: CatInfo[] = [];
   savedCatInfos: CatInfo[] = [];
-  altImage = 'https://t1.daumcdn.net/cfile/tistory/998FBA335C764C711D';
-  onDestroy = new Subject<void>();
+
   catInfos$: Observable<CatInfo[]>;
+
+  onDestroy = new Subject<void>();
 
   constructor(private catService: CatsService) {
     this.catInfos$ = this.catService.getCats();
@@ -43,9 +47,10 @@ export class CardListComponent implements OnInit, OnDestroy {
         ),
         takeUntil(this.onDestroy)
       )
-      .subscribe(
-        cats => ((this.savedCatInfos = cats), (this.showedCatInfos = cats))
-      );
+      .subscribe(cats => {
+        this.savedCatInfos = cats;
+        this.showedCatInfos = cats;
+      });
   }
 
   updateCatInfos(catLists: CatInfo[]): void {
@@ -53,8 +58,16 @@ export class CardListComponent implements OnInit, OnDestroy {
   }
 
   updateSelectedCat(catName: string): void {
-    this.showedCatInfos = this.savedCatInfos.filter(
-      cat => cat.name === catName
-    );
+    if (catName !== '') {
+      this.showedCatInfos = this.savedCatInfos.filter(cat =>
+        cat.name.match(new RegExp(catName, 'i'))
+      );
+    } else {
+      this.showedCatInfos = this.savedCatInfos;
+    }
+  }
+
+  resetPage(): void {
+    this.showedCatInfos = this.savedCatInfos;
   }
 }
