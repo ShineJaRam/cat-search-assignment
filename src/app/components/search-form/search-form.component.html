@@ -8,7 +8,7 @@
     />
     <button type="submit" class="form-button">search</button>
   </form>
-  <ul class="search-result">
+  <ul class="search-result" *ngIf="focusOut">
     <li class="search-item" *ngIf="hasNoKeyword; else searchItem">
       추천 검색어가 없습니다.
     </li>

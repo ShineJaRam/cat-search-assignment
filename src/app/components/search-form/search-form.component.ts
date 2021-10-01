@@ -35,6 +35,7 @@ export class SearchFormComponent implements OnInit, OnDestroy {
   altImage = 'https://t1.daumcdn.net/cfile/tistory/998FBA335C764C711D';
 
   hasNoKeyword = false;
+  focusOut = false;
 
   inputFormGroup: FormGroup;
 
@@ -63,9 +64,8 @@ export class SearchFormComponent implements OnInit, OnDestroy {
       .pipe(
         map(
           cats =>
-            (this.hasNoKeyword =
-              cats.length === 0 &&
-              this.inputFormGroup.controls['keyword'].value.length !== 0)
+            cats.length === 0 &&
+            this.inputFormGroup.controls['keyword'].value.length !== 0
         )
       )
       .subscribe(result => (this.hasNoKeyword = result));
@@ -86,13 +86,19 @@ export class SearchFormComponent implements OnInit, OnDestroy {
     } = this.inputFormGroup;
 
     this.selectedCatName.emit(keyword);
+    this.focusOut = false;
   }
 
   selectCat(keyword: string): void {
+    this.inputFormGroup.patchValue({
+      keyword,
+    });
+    this.focusOut = false;
     this.selectedCatName.emit(keyword);
   }
 
   selectText(): void {
+    this.focusOut = true;
     this.formInput.nativeElement.select();
   }
 }
