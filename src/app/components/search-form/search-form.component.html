@@ -15,7 +15,7 @@
     <ng-template #searchItem>
       <li
         class="search-item"
-        *ngFor="let cat of cats$ | async"
+        *ngFor="let cat of catsList"
         (click)="selectCat(cat.name)"
       >
         {{ cat.name }}
